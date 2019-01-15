@@ -27,7 +27,7 @@ function deferred() {
 		canvas.height = h;
 		vidReady.resolve();
 	});
-	navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
+	navigator.mediaDevices.getUserMedia({video: {facingMode: "user"}}).then(stream => {
 		vid.srcObject = stream;
 	});
 
