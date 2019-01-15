@@ -8,6 +8,7 @@ var Ginger = function() {
   var queue = [];
 
   // Object3Ds with all meshes as children.
+  var gingerPivot = new THREE.Object3D();
   var ginger = new THREE.Object3D();
   var leftEye = new THREE.Object3D();
   var rightEye = new THREE.Object3D();
@@ -21,14 +22,16 @@ var Ginger = function() {
   var slider = document.getElementById('range');
   var selected = 'eyes';
 
+  var basepath = 'ginger/model'
+
   // All textures that need to be loaded before the meshes.
   var textures = {
     gingercolor: {
-      path: 'model/ginger_color.jpg',
+      path: `${basepath}/ginger_color.jpg`,
       texture: null,
     },
     gingercolornormal: {
-      path: 'model/ginger_norm.jpg',
+      path: `${basepath}/ginger_norm.jpg`,
       texture: null,
     }
   };
@@ -37,29 +40,21 @@ var Ginger = function() {
   // This helps keep horrifying body parts from showing before other parts.
   var meshes = {
     gingerhead: {
-      path: 'model/gingerhead.json',
+      path: `${basepath}/gingerhead.json`,
       texture: textures.gingercolor,
       normalmap: textures.gingercolornormal,
       morphTargets: true,
       mesh: null
     },
     gingerheadband: {
-      path: 'model/gingerheadband.json',
+      path: `${basepath}/gingerheadband.json`,
       texture: textures.gingercolor,
       normalmap: null,
       morphTargets: false,
       mesh: null
     },
-    gingerheadphones: {
-      path: 'model/gingerheadphones.json',
-      texture: null,
-      normalmap: null,
-      color: new THREE.Color('rgb(180, 180, 180)'),
-      morphTargets: false,
-      mesh: null
-    },
     gingerlefteye: {
-      path: 'model/gingerlefteye.json',
+      path: `${basepath}/gingerlefteye.json`,
       texture: textures.gingercolor,
       normalmap: null,
       morphTargets: false,
@@ -68,7 +63,7 @@ var Ginger = function() {
       mesh: null
     },
     gingerrighteye: {
-      path: 'model/gingerrighteye.json',
+      path: `${basepath}/gingerrighteye.json`,
       texture: textures.gingercolor,
       normalmap: null,
       morphTargets: false,
@@ -77,21 +72,21 @@ var Ginger = function() {
       mesh: null
     },
     gingerteethbot: {
-      path: 'model/gingerteethbot.json',
+      path: `${basepath}/gingerteethbot.json`,
       texture: textures.gingercolor,
       normalmap: null,
       morphTargets: true,
       mesh: null
     },
     gingerteethtop: {
-      path: 'model/gingerteethtop.json',
+      path: `${basepath}/gingerteethtop.json`,
       texture: textures.gingercolor,
       normalmap: null,
       morphTargets: true,
       mesh: null
     },
     gingertongue: {
-      path: 'model/gingertongue.json',
+      path: `${basepath}/gingertongue.json`,
       texture: textures.gingercolor,
       normalmap: null,
       morphTargets: true,
@@ -113,7 +108,7 @@ var Ginger = function() {
       // are moved backed to fit the appearance.
       behavior: function(value) {
         var sex = morphs.sex.value;
-        var recede = EASING.linear(sex, 0, -0.125, 1);
+        var recede = -0.125 * sex;
 
         if (this.leftEyeOrigin === null) {
           this.leftEyeOrigin = leftEye.position.clone();
@@ -320,6 +315,7 @@ var Ginger = function() {
   };
 
   function morph() {
+    if (!loaded) return;
     // Another separate loop for morph behaviors. This is so the scale or morph
     // of certain meshes can be adjusted to account for others.
     for (var item in morphs) {
@@ -398,7 +394,7 @@ var Ginger = function() {
     var goal = Object.keys(meshes).length;
     var progress = 0;
 
-    var jsonLoader = new THREE.JSONLoader();
+    var jsonLoader = new THREE.LegacyJSONLoader();
 
     // Adds all meshes loaded into the scene.
     var addMeshes = function() {
@@ -445,7 +441,7 @@ var Ginger = function() {
           morphTargets: meshes[mesh].morphTargets
         });
 
-        meshes[mesh].mesh = new THREE.Mesh(geometry, material);
+        meshes[mesh].mesh = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(geometry), material);
         progress++;
 
         // Once all meshes are loaded, all meshes are added to the scene.
@@ -647,7 +643,7 @@ var Ginger = function() {
     var max = selectControl.max;
     var percent = (((selectControl.morph.value - min) * 100) / (max - min)) / 100;
 
-    slider.value = percent;
+    // slider.value = percent;
   }
 
   function generateShareLink() {
@@ -738,23 +734,20 @@ var Ginger = function() {
 
       // Add the canvas to the renderer wrapper so the panel
       // stays above the canvas.
-      document.getElementById('renderer').appendChild(renderer.domElement);
+      document.body.appendChild(renderer.domElement);
 
       // Allow viewport resizing whenever the window resizes.
       window.onresize = onresize;
 
       // Setup event so ginger's eyes track the mouse
-      var elRenderer = document.getElementById('renderer');
+      var elRenderer = document.body;
       elRenderer.addEventListener('mousemove', onmousemove);
       elRenderer.addEventListener('touchmove', ontouchmove);
 
       // Setup events for the slider and selector.
-      document.getElementById('range').onchange = onrangeslide;
-      document.getElementById('range').oninput = onrangeslide;
-      document.getElementById('morph').onchange = onselect;
-      document.getElementById('share').onclick = onsharepress;
-      document.getElementById('mousetrack').onclick = onmousetrack;
-      document.getElementById('screenshot').onclick = onscreenshotpress;
+      // document.getElementById('range').onchange = onrangeslide;
+      // document.getElementById('range').oninput = onrangeslide;
+      // document.getElementById('morph').onchange = onselect;
 
       // Parse the url substring for GET parameters and put them
       // in a dictionary.
@@ -776,7 +769,10 @@ var Ginger = function() {
       scene.add(directionalLight);
 
       // Ginger is the container for all the meshes.
-      scene.add(ginger);
+      ginger.position.y = -5.5;
+      ginger.position.z = -1.5;
+      gingerPivot.add(ginger);
+      scene.add(gingerPivot);
 
       leftEye.position.set(0.96, 6.169, 1.305);
       ginger.add(leftEye);
@@ -793,6 +789,9 @@ var Ginger = function() {
       // Start the render loop.
       animate();
 
-    }
+    },
+    controls,
+    morph,
+    gingerPivot
   };
 };

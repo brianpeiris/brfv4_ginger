@@ -4,12 +4,20 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width">
 		<title>brfv4 ginger</title>
+		<style>
+			html, body{ margin: 0; padding: 0; overflow: hidden; }
+			#info { position: absolute; color: white; right: 0; white-space: pre; }
+			#canvas { position: absolute; }
+		</style>
 	</head>
 	<body>
+		<span id="info"></span>
 		<video id="vid" autoplay style="display: none;"></video>
 		<canvas id="canvas"></canvas>
-		<script src="https://unpkg.com/three@0.100.0/build/three.min.js"></script>
+		<script src="https://unpkg.com/three@0.100.0/build/three.js"></script>
+		<script src="https://unpkg.com/three@0.100.0/examples/js/loaders/deprecated/LegacyJSONLoader.js"></script>
 		<script src="BRFv4_JS_TK101018_v4.1.0_trial.js"></script>
+		<script src="ginger/ginger.js"></script>
 		<script src="index.js"></script>
 	</body>
 </html>
